@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="package-plugin-utils"
+	basedir="." default="">
+
+	<target name="bootstrap" description="Install 3rd party dependencies">
+		<mkdir dir="${user.home}/.ant/lib" />
+		<get verbose="true" dest="${user.home}/.ant/lib/jsch.jar"
+			src="http://search.maven.org/remotecontent?filepath=com/jcraft/jsch/0.1.50/jsch-0.1.50.jar" />
+	</target>
+
+	<target name="resolve-build-jars">
+		<ivy:retrieve organisation="org.tigris" module="svnant"
+			revision="1.3.1" inline="true" pattern="${basedir}/lib/[artifact].[ext]" />
+		<ivy:retrieve organisation="org.tigris" module="svnClientAdapter"
+			revision="1.3.1" inline="true" pattern="${basedir}/lib/[artifact].[ext]" />
+	</target>
+
+	<target name="init-plugin-build">
+		<property file="build/properties/plugin.properties" />
+		<property file="build/properties/version.properties" />
+		<tstamp />
+	</target>
+
+	<tstamp>
+		<format property="build-date-time" pattern="yyyy-MM-dd HH:mm:SSS z" />
+	</tstamp>
+
+	<target name="add-version-info-to-files" depends="init-plugin-build">
+		<replace file="${classes.home}/rsuite-plugin.xml">
+			<replacefilter token="^version^" value="${plugin.version}" />
+			<replacefilter token="^svnRev^" value="${rsuite.svn.revision.max}" />
+			<replacefilter token="^timestamp^" value="${build-date-time}" />
+		</replace>
+
+	</target>
+	<target name="set-publish-resolver">
+		<echo message="Setting up resolver" />
+		<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy">
+			<classpath>
+				<fileset dir="${lib.home}/build" />
+			</classpath>
+		</taskdef>
+
+		<groovy>
+			<![CDATA[
+			import java.awt.*
+
+			def nogui = GraphicsEnvironment.isHeadless()
+		    if (nogui &&  properties["ivy.repo.pass"] == null){
+				def cons = System.console() 
+
+				if (cons) {
+					def user = cons.readLine('Enter ivy repository username:') 
+					def passwd = cons.readPassword('Enter ivy repository password:')
+
+					properties["ivy.repo.user"] = user
+					properties["ivy.repo.pass"] = passwd.toString()
+				} 
+			}
+			
+			properties["gui"] =  !GraphicsEnvironment.isHeadless()
+			]]>
+		</groovy>
+
+		<condition property="ivy.publish.resolver" value="uploadResolver"
+			else="uploadResolverAuth">
+			<and>
+				<isset property="ivy.repo.user" />
+				<isset property="ivy.repo.pass" />
+			</and>
+		</condition>
+
+	</target>
+
+	<!-- Puts the plugins in Ivy reflecting the value of the version_property 
+		in version.properties -->
+	<target name="push-plugin-to-ivy" depends="set-publish-resolver">
+		<property name="revision" value="${plugin.version}" />	
+		<ivy:settings id="ivy.instance2"
+			file="../rsuite-oxygen-author-component-build-configuration/ivy-settings.xml" />
+
+		<!--  copy file="${working-folder}/${ivyfile}" todir="${working-folder}/target"
+			overwrite="true" / -->
+		
+		<echo message="${working-folder}/${ivyfile}"></echo>
+		<echo message="${working-folder}/target/${module}"></echo>
+		<echo message="${module}"></echo>
+		
+		<ivy:publish artifactspattern="${working-folder}/target/${module}.[ext]"
+			resolver="${ivy.publish.resolver}" pubrevision="${revision}" status="release"
+			update="true" overwrite="true" organisation="${ivy.organization}"
+			module="${module}" revision="${revision}" srcivypattern="${ivyfile}"
+			settingsref="ivy.instance2" />
+		<echo message="project ${module} released with version ${revision}" />
+
+	</target>
+
+
+	<macrodef name="push-to-ivy">
+		<attribute name="module" />
+		<attribute name="ivy-file" />
+		<attribute name="working-folder" />
+		<sequential>
+
+			<antcall target="push-plugin-to-ivy">
+				<param name="module" value="@{module}" />
+				<param name="ivyfile" value="@{ivy-file}" />
+				<param name="working-folder" value="@{working-folder}" />
+			</antcall>
+		</sequential>
+	</macrodef>
+
+
+</project>

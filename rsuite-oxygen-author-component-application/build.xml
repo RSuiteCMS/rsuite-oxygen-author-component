@@ -1,0 +1,234 @@
+<project name="rsuite oxygen author component application" xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." xmlns:ac="antlib:net.sf.antcontrib" default="prepare-oxygen-jars">
+
+	<import file="../rsuite-oxygen-author-component-build-configuration/build-common.xml" />
+
+	<property file="../rsuite-oxygen-author-component-build-configuration/plugin.properties" />
+	<property file="build/build.properties" />
+	<property name="ivy-location" value="build/ivy.xml" />
+
+	<target name="prepare-oxygen-jars" depends="init-prepare-oxygen-jars, resolve, prepare-options-jar, collect-base-oxygen-jars, collect-oxygen-optional-and-additional, addTrustedLibraries, sign-oxygen-jars" />
+
+	<target name="create-and-sing-application-jar" depends="create-application-jar" description="Creates a rsuite oxygen application jar">
+		<sign-jars configuration-dir="../rsuite-oxygen-author-component-build-configuration" dir="${target.home}" include-pattern="*.jar" />
+	</target>
+
+	<target name="create-application-jar" depends="compile, create-version-manifiest">
+		<delete>
+			<fileset dir="${target.home}">
+				<include name="rsuite-oxygen-author-component-application*.jar"/>
+			</fileset>		
+		</delete>
+		
+		<jar destfile="${rsuite.oxygen.jar}">			
+			<manifest>
+				<attribute name="Caller-Allowable-Codebase" value="*" />
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Application-Name" value="Rsuite Oxygen Integration" />
+				<attribute name="Codebase" value="*" />
+				<attribute name="Application-Library-Allowable-Codebase" value="*" />				
+			</manifest>
+			<fileset dir="${classes.home}">
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir="${resources.home}">
+				<include name="images/**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target name="create-version-manifiest">
+		<manifest file="${classes.home}/Manifest-Version.MF">
+				<attribute name="Rsuite-Oxygen-Version" value="${plugin.version}" />
+		</manifest>
+	</target>
+
+	<target name="compile" depends="init-compile, resolve, define-classpath">
+		<javac srcdir="${src.home}" destdir="${classes.home}" debug="on" deprecation="on" classpathref="classpath.base" includes="**/*.java" source="${plugin.java.version}" target="${plugin.java.version}" />
+	</target>
+
+	<target name="init-compile">
+		<delete dir="${classes.home}" failonerror="false" />
+		<mkdir dir="${classes.home}" />
+	</target>
+
+	<target name="resolve" unless="skip.resolve" depends="init-resolve, download-dependencies, extract-oxygen-sdk-package" description="Retrieve dependencies" />
+
+	<target name="init-resolve">
+		<tstamp />
+		<delete dir="${lib.home}" />
+		<mkdir dir="${lib.home}" />
+	</target>
+
+	<target name="download-dependencies" description="Retrieve dependencies with ivy">
+		<ivy:settings id="ivy.instance" file="../rsuite-oxygen-author-component-build-configuration/ivy-settings.xml" />
+
+		<ivy:retrieve pattern="${lib.home}/[conf]/[artifact].[ext]" file="${ivy-location}" type="jar, zip" conf="oxygen-base-package, build" />
+		<ivy:retrieve pattern="${lib.home}/[conf]/[artifact]__V[revision].[ext]" file="${ivy-location}" type="jar, zip" conf="oxygen-additional-jars, oxygen-to-patch-jars" />
+		<ivy:retrieve pattern="${lib.home}/[conf]/[organisation]/[artifact]__V[revision].[ext]" file="${ivy-location}" type="jar, zip" conf="oxygen-optional-jars" />
+	</target>
+
+	<target name="extract-oxygen-sdk-package">
+		<unzip dest="${lib.oxygen.jar}" src="${lib.home}/oxygen-base-package/oxygen-author-component.zip">
+			<patternset>
+				<include name="oxygen-sdk/*.jar" />
+			</patternset>
+			<mapper type="glob" from="oxygen-sdk/*.jar" to="*${jar.version.suffix}.jar" />
+		</unzip>
+	</target>
+
+	<target name="define-classpath">
+		<path id="classpath.base">
+			<fileset dir="${lib.home}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+	<target name="init-prepare-oxygen-jars">
+		<delete dir="${target.oxygen.jars}" />
+		<mkdir dir="${target.oxygen.jars}" />
+	</target>
+
+	<target name="collect-oxygen-optional-and-additional">
+		<copy todir="${target.oxygen.jars}">
+			<fileset dir="${lib.home}">
+				<include name="oxygen-additional-jars/*" />
+				<include name="oxygen-optional-jars/**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+
+	<target name="prepare-options-jar">
+		<zip destfile="${target.home}/options.zip" basedir="${resources.options}" />
+		<jar destfile="${rsuite.oxygen.options.jar}">
+			<manifest>
+				<attribute name="Caller-Allowable-Codebase" value="*" />
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Application-Name" value="Rsuite Oxygen Integration" />
+				<attribute name="Codebase" value="*" />
+				<attribute name="Application-Library-Allowable-Codebase" value="*" />
+			</manifest>
+			<fileset dir="${target.home}">
+				<include name="options.zip" />
+			</fileset>
+		</jar>
+		<delete file="${target.home}/options.zip" />
+	</target>
+
+	<target name="collect-base-oxygen-jars" depends="patch-xmlgraphics-commons-jar, prepare-oxygen-base-bundle-jar">
+		<copy todir="${target.oxygen.base.jars}">
+			<fileset dir="${lib.oxygen.jar}">
+				<include name="**/native*.jar" />
+				<include name="**/*hunspell*.jar" />
+				<include name="**/jna*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="patch-xmlgraphics-commons-jar" depends="define-classpath, get-xmlgraphic-common-file-name" description="Updates the jar to get rid off the security warnings">
+		<property name="patch.home" value="${target.home}/patch" />
+		<property name="patch.classes" value="${patch.home}/classes" />
+
+		<mkdir dir="${patch.home}" />
+		<mkdir dir="${patch.classes}" />
+
+		<unzip dest="${patch.classes}" src="${lib.oxygen.to.patch.jar}/${xmlgraphics.commons.base.name}.jar" />
+
+		<javac srcdir="${src.patch.home}" destdir="${patch.classes}" debug="on" deprecation="on" classpathref="classpath.base" includes="**/*.java" />
+
+		<mkdir dir="${patch.home}/temp" />
+
+		<jar destfile="${target.oxygen.base.jars}/${xmlgraphics.commons.base.name}.jar">
+			<fileset dir="${patch.classes}">
+				<include name="**/*" />
+			</fileset>
+		</jar>
+
+		<delete dir="${patch.home}" />
+	</target>
+
+	<target name="get-xmlgraphic-common-file-name">
+		<path id="xmlgraphics.commons.id">
+			<fileset dir="${lib.oxygen.to.patch.jar}">
+				<include name="xmlgraphics-commons*.jar" />
+			</fileset>
+		</path>
+
+		<property name="xmlgraphics.commons.path" refid="xmlgraphics.commons.id" />
+		<basename property="xmlgraphics.commons.base.name" file="${xmlgraphics.commons.path}" suffix=".jar" />
+	</target>
+
+
+	<target name="prepare-oxygen-base-bundle-jar">
+		<mkdir dir="${target.home}/temp/oxygenBase" />
+		<unzip dest="${target.home}/temp/oxygenBase">
+			<fileset dir="${lib.oxygen.jar}">
+				<exclude name="**/xmlgraphics-commons*.jar" />
+				<exclude name="**/native*.jar" />
+				<exclude name="**/*hunspell*.jar" />
+				<exclude name="**/jna*.jar" />
+				<include name="**/*.jar" />
+			</fileset>
+		</unzip>
+
+		<jar destfile="${target.oxygen.base.jars}/baseOxygenJars__V${oxygen.version}.jar">
+			<fileset dir="${target.home}/temp/oxygenBase">
+				<include name="**/*.*" />
+			</fileset>
+		</jar>
+
+		<delete dir="${target.home}/temp" />
+	</target>
+
+
+	<target name="addTrustedLibraries" depends="setup-ant-contrib">
+		<ac:foreach target="addTrustedLibraryProperty" param="jarFile">
+			<path>
+				<fileset dir="${target.oxygen.jars}">
+					<exclude name="oxygen-resource-jars/*" />
+					<include name="**/*.jar" />
+				</fileset>
+			</path>
+		</ac:foreach>
+	</target>
+
+	<target name="setup-ant-contrib">
+		<taskdef resource="net/sf/antcontrib/antlib.xml" uri="antlib:net.sf.antcontrib">
+			<classpath>
+				<fileset dir="${lib.build}" />
+			</classpath>
+		</taskdef>
+	</target>
+
+	<target name="addTrustedLibraryProperty">
+		<jar file="${jarFile}" update="true">
+			<manifest>
+				<attribute name="Caller-Allowable-Codebase" value="*" />
+				<attribute name="Permissions" value="all-permissions" />
+				<attribute name="Application-Name" value="Rsuite Oxygen Integration" />
+				<attribute name="Codebase" value="*" />
+				<attribute name="Application-Library-Allowable-Codebase" value="*" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="sign-oxygen-jars">
+		<parallel>
+			<sequential>
+				<sign-jars-for-dir dir="${target.oxygen.jars}/oxygen-resource-jars" />
+				<sign-jars-for-dir dir="${target.oxygen.jars}/oxygen-additional-jars" />
+			</sequential>
+			<sign-jars-for-dir dir="${target.oxygen.jars}/oxygen-base-jars" />
+			<sign-jars-for-dir dir="${target.oxygen.jars}/oxygen-optional-jars" />
+		</parallel>
+	</target>
+
+	<macrodef name="sign-jars-for-dir">
+		<attribute name="dir" />
+		<sequential>
+			<sign-jars configuration-dir="../rsuite-oxygen-author-component-build-configuration" dir="@{dir}" include-pattern="**/*.jar" />
+		</sequential>
+	</macrodef>
+
+</project>

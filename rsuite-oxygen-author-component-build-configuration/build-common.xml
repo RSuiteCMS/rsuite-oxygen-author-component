@@ -1,0 +1,17 @@
+<project name="Common build targets and macros for author component">
+	
+	<macrodef name="sign-jars">
+		<attribute name="dir"/>
+		<attribute name="configuration-dir"/>
+		<attribute name="include-pattern"/>
+		<attribute name="exclude-pattern" default=""/>
+
+		<sequential>
+			<signjar storetype="PKCS12" alias="rsi_code_cert" keystore="@{configuration-dir}/cert/rsi_code_cert.p12" storepass="@rEqUBrucraTr-NA" preservelastmodified="true" lazy="true"  tsaurl="http://tsa.starfieldtech.com">
+				<path>
+					<fileset dir="@{dir}" includes="@{include-pattern}" excludes="@{exclude-pattern}" />					
+				</path>
+			</signjar>
+		</sequential>
+	</macrodef>
+</project>

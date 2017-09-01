@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="RSuite Oxygen Launcher Application" default="prepare-launcher-application-package">
+
+	<import file="../rsuite-oxygen-author-component-launcher-base/build-launcher-common.xml" />
+	<import file="../rsuite-oxygen-author-component-build-configuration/build-common.xml" />
+
+	<target name="prepare-launcher-application-package" depends="set-development-version, create-rsuite-oxygen-launcher-application-jar, create-rsuite-oxygen-launcher-tempalate-jar, build-jnlp" />
+
+	<target name="create-rsuite-oxygen-launcher-application-jar" depends="set-up, get-launcher-version, create-rsuite-oxygen-launcher-base-jar, define-classpath-with-base-jar">
+		<create-launch-jar type="application" />
+		<sign-jars configuration-dir="${configuration-project}" dir="${target.home}" include-pattern="*application*.jar" />
+	</target>
+
+	<target name="create-rsuite-oxygen-launcher-tempalate-jar" depends="create-rsuite-oxygen-launcher-application-jar">
+		<jar destfile="${target.home}/rsuite-oxygen-launcher-template.jar">
+			<manifest>
+				<attribute name="Main-Class" value="com.rsicms.rsuite.editors.oxygen.launcher.OxygenApplicationRSuiteGuiRunner" />
+			</manifest>
+			<fileset dir="${launcher-base-project}/${target.bin}">
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir="${target.bin}">
+				<exclude name="**/*.JNLP" />
+				<include name="**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+
+</project>

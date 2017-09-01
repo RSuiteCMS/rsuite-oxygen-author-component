@@ -1,0 +1,287 @@
+<project name="RSuite Oxygen Author Component Integration Plugin" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".">
+
+	<property name="build-configuration" value="../rsuite-oxygen-author-component-build-configuration" />
+	<property name="oxygen-application-project-location" value="../rsuite-oxygen-author-component-application" />
+	<property name="oxygen-launcher-project-location-prefix" value="../rsuite-oxygen-author-component-launcher" />
+
+	<property file="${build-configuration}/plugin.properties" />
+
+	<property file="build/properties/build.properties" />
+
+	<property name="ivy-location" value="build/ivy.xml" />
+
+	<import file="build/build-delivery-helper.xml"/>
+	
+	<target name="bootstrap"  description="loads required ant libraries">
+		<mkdir dir="${user.home}/.ant/lib" />
+		<get dest="${user.home}/.ant/lib">
+		  <url url="http://central.maven.org/maven2/com/jcraft/jsch/0.1.52/jsch-0.1.52.jar"/>   
+		</get>
+	</target>
+	
+	<target name="build-and-delivery-to-ivy" depends="package-api-jar, package-plugin-jar"   description="[MAIN-TARGET] Build the integration plugin and push jars to IVY">	
+		<push-to-ivy module="rsuite-oxygen-author-component-application"  ivy-file="../rsuite-oxygen-author-component-application/build/ivy.xml" working-folder="../rsuite-oxygen-author-component-application"/>
+		<push-to-ivy module="${plugin.name}-plugin" ivy-file="build/ivy.xml" working-folder="${basedir}" />
+		<push-to-ivy module="${plugin.name}-api"  ivy-file="build/ivy-api.xml" working-folder="${basedir}"/>
+	</target>
+	
+	<target name="deploy-locally-rebuild-plugin-jar" depends="rebuild-plugin-jar" description="Deploy locally rebuilt plugin">
+		<property file="build/properties/local.properties" />
+		<copy todir="${rsuite.plugins.dir}">
+			<fileset dir="${target.home}" includes="*plugin*.jar" />
+		</copy>
+	</target>
+
+	<target name="deploy-locally-plugin-jar" depends="package-plugin-jar" description="Deploy locally plugin">
+		<property file="build/properties/local.properties" />
+		<copy todir="${rsuite.plugins.dir}">
+			<fileset dir="${target.home}" includes="*.jar" />
+		</copy>
+	</target>
+
+	<target name="rebuild-plugin-jar">
+		<antcall target="copy-class-files" />
+		<antcall target="copy-source-files" />
+		<antcall target="dev-copy-rsuite-oxygen-lib" />
+		<antcall target="add-version-info-to-plugin-descriptor" />
+		<antcall target="dev-copy-launcher-files" />
+		<antcall target="create-plugin-jar" />
+	</target>
+
+	<target name="package-plugin-jar" depends="init, create-plugin-package, create-plugin-jar" description="Creates oxygen author component rsuite plugin" />
+
+
+	<target name="create-plugin-package" depends="resolve" description="Create plugin zip package for oXygen editor">
+		<antcall target="init-plugin-package" />
+		<antcall target="copy-class-files" />
+		<antcall target="copy-source-files" />
+		<antcall target="copy-additional-plugin-jars" />
+		<antcall target="add-version-info-to-plugin-descriptor" />
+		<antcall target="copy-oxygen-libs" />
+		<antcall target="copy-rsuite-oxygen-lib" />
+		<antcall target="copy-launcher-files" />
+	</target>
+
+	<target name="create-plugin-jar">
+		<tstamp>
+			<format property="TODAY" pattern="yyyy-MM-dd" locale="en,UK" />
+		</tstamp>
+
+		<jar destfile="${target.jar}">
+
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<section name="common">
+					<attribute name="Specification-Title" value="Oxygen integration Plugin" />
+					<attribute name="Specification-Vendor" value="RSI Conent Solution" />
+					<attribute name="Implementation-Version" value="${TODAY}" />
+					<attribute name="Implementation-Vendor" value="RSI Content Solution" />
+					<attribute name="Version" value="${plugin.version}" />
+				</section>
+			</manifest>
+
+			<fileset dir="${target.rsuite.plugin.package}">
+				<include name="**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="init-plugin-package">
+		<mkdir dir="${target.rsuite.plugin.package}" />
+	</target>
+
+	<target name="add-version-info-to-plugin-descriptor" depends="init-plugin-build">
+		<replace file="${target.rsuite.plugin.package}/rsuite-plugin.xml">
+			<replacefilter token="^version^" value="${plugin.version}" />
+			<replacefilter token="^svnRev^" value="${rsuite.svn.revision.max}" />
+			<replacefilter token="^timestamp^" value="${build-date-time}" />
+		</replace>
+	</target>
+
+	<target name="init-plugin-build">
+		<tstamp>
+			<format property="build-date-time" pattern="yyyy-MM-dd HH:mm:SSS z" />
+		</tstamp>
+	</target>
+
+	<target name="copy-source-files">
+		<copy file="${src.java.home}/rsuite-plugin.xml" todir="${target.rsuite.plugin.package}" overwrite="yes" />
+
+		<copy todir="${target.rsuite.plugin.package}">
+			<fileset dir="${resources.home}">
+				<include name="WebContent/**/*" />
+			</fileset>
+		</copy>
+
+		<copy todir="${target.rsuite.plugin.package.web}">
+			<fileset dir="${src.home}">
+				<include name="xquery/**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy-class-files" depends="compile">
+		<copy todir="${target.rsuite.plugin.package}">
+			<fileset dir="${classes.home}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy-additional-plugin-jars">
+		<copy todir="${target.rsuite.plugin.package}">
+			<fileset dir="${lib.plugin.jars}">
+				<include name="*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy-oxygen-libs">
+		<ant dir="${oxygen-application-project-location}" inheritall="no" />
+
+		<copy todir="${target.rsuite.plugin.package.web}">
+			<fileset dir="${oxygen-application-project-location}/target">
+				<include name="oxygen-jars/**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy-rsuite-oxygen-lib">
+		<ant dir="${oxygen-application-project-location}" inheritall="no" target="create-and-sing-application-jar" />
+		<copy todir="${target.rsuite.plugin.package.web}/oxygen-jars/oxygen-base-jars">
+			<fileset dir="${oxygen-application-project-location}/target">
+				<include name="*.jar" />
+			</fileset>
+			<mapper type="glob" from="*.jar" to="*__V${plugin.version}.jar" />
+		</copy>
+	</target>
+
+	<target name="dev-copy-rsuite-oxygen-lib">
+		<delete>
+			<fileset dir="${target.rsuite.plugin.package.web}/oxygen-jars/oxygen-base-jars" includes="rsuite-oxygen*.jar" />
+		</delete>
+
+		<antcall target="copy-rsuite-oxygen-lib" />
+		<antcall target="rename-rsuite-oxygen-lib" />
+
+	</target>
+
+	<target name="rename-rsuite-oxygen-lib">
+		<tstamp>
+			<format property="now" pattern="yyyyMMddhhmmss" />
+		</tstamp>
+
+		<move todir="${target.rsuite.plugin.package.web}/oxygen-jars/oxygen-base-jars" includeemptydirs="false">
+			<fileset dir="${target.rsuite.plugin.package.web}/oxygen-jars/oxygen-base-jars">
+				<include name="rsuite-oxygen*.jar" />
+			</fileset>
+			<mapper type="glob" from="*.jar" to="*-${now}.jar" />
+		</move>
+	</target>
+
+
+
+	<target name="copy-launcher-files">
+
+		<get-launcher type="applet" />
+		<get-launcher type="application" />
+
+		<copy todir="${target.rsuite.plugin.package.launcher}/lib">
+			<fileset dir="${oxygen-launcher-project-location-prefix}-base/target">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="dev-copy-launcher-files">
+
+		<get-launcher type="applet" development-mode="true" />
+		<get-launcher type="application" development-mode="true" />
+
+		<copy todir="${target.rsuite.plugin.package.launcher}/lib">
+			<fileset dir="${oxygen-launcher-project-location-prefix}-base/target">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+
+	<macrodef name="get-launcher">
+		<attribute name="type" />
+		<attribute name="launcher-project-location" default="${oxygen-launcher-project-location-prefix}-@{type}" />
+		<attribute name="development-mode" default="false" />
+
+		<sequential>
+			<mkdir dir="${target.rsuite.plugin.package.launcher}" />
+			<mkdir dir="${target.rsuite.plugin.package.launcher}/lib" />
+			<mkdir dir="${target.rsuite.plugin.package.launcher}/jnlp/@{type}" />
+
+
+			<ant dir="@{launcher-project-location}" inheritall="no">
+				<property name="development-mode" value="@{development-mode}" />
+			</ant>
+
+			<copy todir="${target.rsuite.plugin.package.launcher}">
+				<fileset dir="@{launcher-project-location}/target">
+					<include name="*.properties" />
+				</fileset>
+			</copy>
+
+			<copy todir="${target.rsuite.plugin.package.launcher}/lib">
+				<fileset dir="@{launcher-project-location}/target">
+					<include name="*.jar" />
+				</fileset>
+			</copy>
+
+			<copy todir="${target.rsuite.plugin.package.launcher}/jnlp/@{type}">
+				<fileset dir="@{launcher-project-location}/target/jnlp">
+					<include name="**/*" />
+				</fileset>
+			</copy>
+
+		</sequential>
+	</macrodef>
+
+
+	<target name="package-api-jar" depends="compile" description="Creates api jar for Oxygen integration">
+		<jar destfile="${rsuite.oxygen.api.jar}">
+			<manifest>
+				<attribute name="Rsuite-Applet-Version" value="${plugin.version}" />
+			</manifest>
+			<fileset dir="${classes.home}">
+				<include name="**/integration/api/**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="compile" depends="resolve, define-classpath">
+		<mkdir dir="${target.home}" />
+		<delete dir="${classes.home}/com" />
+		<mkdir dir="${classes.home}" />
+		<javac srcdir="${src.home}" destdir="${classes.home}" debug="on" deprecation="on" classpathref="classpath.base" includes="**/*.java" source="${plugin.java.version}" target="${plugin.java.version}" />
+	</target>
+
+	<target name="define-classpath">
+		<path id="classpath.base">
+			<pathelement path="${classes.home}" />
+			<fileset dir="${lib.home}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+
+	<target name="resolve" unless="skip.resolve" description="Retrieve dependencies with ivy">
+		<delete dir="${lib.home}" />
+		<mkdir dir="${lib.home}" />
+		<ivy:settings id="ivy.instance" file="${build-configuration}/ivy-settings.xml" />
+
+		<ivy:retrieve pattern="${lib.home}/[conf]/[artifact].[ext]" file="${ivy-location}" type="jar, zip" conf="build, test, compile-base-jar, rsuite-plugin-jar" />
+	</target>
+
+	<target name="init">
+		<delete dir="${target.rsuite.plugin.package}" failonerror="false" />
+		<mkdir dir="${target.home}" />
+	</target>
+
+</project>

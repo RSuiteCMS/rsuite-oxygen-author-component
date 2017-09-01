@@ -1,0 +1,6 @@
+<div class="test">
+<h3>Please wait...</h3>
+   <applet width="450" height="150" code="com.rsicms.rsuite.editors.oxygen.launcher.launch.OxygenApplicationLauncherApplet">
+      <param name="jnlp_href" {{bindAttr value="view.jnlpUrl" }}">
+   </applet>   
+</div>

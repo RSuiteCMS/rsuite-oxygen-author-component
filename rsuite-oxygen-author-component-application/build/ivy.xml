@@ -1,0 +1,65 @@
+<ivy-module version="2.0">
+	<info organisation="rsi" module="rsuite-oxygen-author-component-application" />
+
+	<configurations>
+		<conf name="oxygen-base-package" />
+		<conf name="oxygen-base-jars" />
+		<conf name="oxygen-additional-jars" />
+		<conf name="oxygen-optional-jars" />
+		<conf name="oxygen-to-patch-jars" />
+		<conf name="build" />		
+	</configurations>
+
+	<publications>
+		<artifact name="rsuite-oxygen-author-component-application"
+			type="jar" />
+	</publications>
+
+	<dependencies>
+
+		<!-- BASE OXYGEN PACKAGE -->
+		<dependency org="oxygen" name="oxygen-author-component"
+			rev="17.0.3" conf="oxygen-base-package->default">
+			<artifact name="oxygen-author-component" type="zip" />
+		</dependency>
+		<!-- BASE OXYGEN PACKAGE -->
+
+		<!-- ADDITIONAL OXYGEN JARS -->
+		<dependency org="apache" name="commons-lang" rev="2.4"
+			conf="oxygen-additional-jars->default" />
+
+		<dependency org="org.restlet" name="org.restlet" rev="2.0.10"
+			conf="oxygen-additional-jars->default" />
+
+		<dependency org="com.fasterxml.jackson.core" name="jackson-core"
+			rev="2.2.3" conf="oxygen-additional-jars->default">
+			<artifact name="jackson-core" type="jar" />
+		</dependency>
+
+		<!-- MathML -->
+		<dependency org="org.apache.xmlgraphics" name="xmlgraphics-commons"
+			rev="1.5" transitive="false" conf="oxygen-to-patch-jars->default">
+			<artifact name="xmlgraphics-commons" type="jar" />
+		</dependency>
+		<!--END ADDITIONAL OXYGEN JARS -->
+
+
+		<!-- OXYGEN OPTIONAL -->
+		<!-- Mathflow -->
+		<dependency org="com.dessci.mathflow" name="MFComposer"
+			rev="2.0b" conf="oxygen-optional-jars->default" />
+		<dependency org="com.dessci.mathflow" name="MFExtraSymFonts"
+			rev="2.0b" conf="oxygen-optional-jars->default" />
+		<dependency org="com.dessci.mathflow" name="MFSimpleEditor"
+			rev="2.0b" conf="oxygen-optional-jars->default" />
+		<dependency org="com.dessci.mathflow" name="MFStructureEditor"
+			rev="2.0b" conf="oxygen-optional-jars->default" />
+		<dependency org="com.dessci.mathflow" name="MFStyleEditor"
+			rev="2.0b" conf="oxygen-optional-jars->default" />
+		<!-- END OXYGEN OPTIONAL -->
+
+
+		<dependency org="ant-contrib" name="ant-contrib" rev="1.0b3" conf="build->default" transitive="false"/>
+
+	</dependencies>
+</ivy-module>

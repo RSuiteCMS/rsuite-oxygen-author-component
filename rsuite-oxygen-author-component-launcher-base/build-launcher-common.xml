@@ -1,0 +1,121 @@
+<project name="RSuite Oxygen Launcher Common">
+
+	<target name="set-up">
+		<property name="configuration-project" value="../rsuite-oxygen-author-component-build-configuration" />
+		<property name="launcher-base-project" value="../rsuite-oxygen-author-component-launcher-base" />
+		<property file="${launcher-base-project}/build.properties" />
+	</target>
+	
+	<target name="create-rsuite-oxygen-launcher-base-jar">	 	
+	 	<ant target="create-rsuite-oxygen-launcher-base-jar" dir="${launcher-base-project}" antfile="${launcher-base-project}/build.xml" />
+	</target>
+	
+	<target name="set-development-version" if="development-mode">
+		<tstamp>
+			<format property="now" pattern="yyyyMMddhhmmss" />
+		</tstamp>
+		<property name="launcher-version" value="${now}" />
+	</target>
+
+	<target name="get-launcher-version">
+		<property name="launcher-version" value="${launcher.version}" />
+		
+		<mkdir dir="${target.home}"/>
+		<propertyfile file="${target.home}/launcher.properties" >
+		  <entry  key="version" value="${launcher-version}"/>
+		</propertyfile>		
+	</target>
+	
+	<target name="define-classpath-with-base-jar">
+		<path id="classpath.base">
+			<fileset dir="${launcher-base-project}/${target.home}">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+	</target>
+	
+	<target name="build-jnlp">
+		<delete dir="${target.home}/jnlp" />
+		<mkdir dir="${target.home}/jnlp" />
+		<copy todir="${target.home}/jnlp">
+			<fileset dir="${src.main.jnlp}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+
+		<configure-jnlp jnlpfile="${target.home}/jnlp/JNLP-INF/APPLICATION_TEMPLATE.JNLP" />		
+	</target>
+	
+	<macrodef name="compile">
+		<attribute name="classFolder" />
+		<attribute name="sourceFolder" />
+
+		<sequential>
+			<mkdir dir="@{classFolder}" />
+			<delete>
+				<fileset dir="@{classFolder}">
+					<include name="**/*" />
+				</fileset>
+			</delete>
+			<javac srcdir="@{sourceFolder}" destdir="@{classFolder}" debug="on"
+				deprecation="on" classpathref="classpath.base" includes="**/*.java"
+				source="${plugin.java.version}" target="${plugin.java.version}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="create-launch-jar">
+		<attribute name="type" />
+		<sequential>
+			<compile sourcefolder="${src.main.java}" classfolder="${target.bin}" />
+			<copy-and-configure-jnlp jnlphome="${src.main.jnlp}"
+				classhome="${target.bin}" />
+			<create-jar jarPath="${target.home}/rsuite-oxygen-launcher-@{type}.jar"
+				classHome="${target.bin}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="create-jar">
+		<attribute name="jarPath" />
+		<attribute name="classHome" />
+
+		<sequential>
+			<jar destfile="@{jarPath}">
+				<manifest>
+					<attribute name="Caller-Allowable-Codebase" value="*" />
+					<attribute name="Permissions" value="all-permissions" />
+					<attribute name="Application-Name" value="Rsuite Oxygen Integration" />
+					<attribute name="Codebase" value="*" />
+					<attribute name="Application-Library-Allowable-Codebase"
+						value="*" />
+				</manifest>
+				<fileset dir="@{classHome}">
+					<include name="**/*.*" />
+				</fileset>
+			</jar>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="copy-and-configure-jnlp">
+		<attribute name="jnlpHome" />
+		<attribute name="classHome" />
+
+		<sequential>
+			<copy todir="@{classHome}" overwrite="true">
+				<fileset dir="@{jnlpHome}">
+					<include name="**/*.*" />
+				</fileset>
+			</copy>
+			<configure-jnlp jnlpFile="@{classHome}/JNLP-INF/APPLICATION_TEMPLATE.JNLP" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="configure-jnlp">
+		<attribute name="jnlpFile" />
+		<sequential>			
+			<replace file="@{jnlpFile}">
+				<replacefilter token="@VERSION@" value="${launcher-version}" />
+			</replace>
+		</sequential>
+	</macrodef>
+
+</project>

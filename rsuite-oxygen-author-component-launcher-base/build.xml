@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="RSuite Oxygen Launcher Base Code" default="create-rsuite-oxygen-launcher-base-jar">
+	<property file="build.properties" />
+
+	<include file="build-launcher-common.xml" />
+	<import file="../rsuite-oxygen-author-component-build-configuration/build-common.xml" />
+
+	<target name="create-rsuite-oxygen-launcher-base-jar" depends="define-classpath">
+		<compile sourcefolder="${src.main.java}" classfolder="${target.bin}" />
+		<create-jar jarPath="${target.home}/rsuite-oxygen-launcher-base.jar" classHome="${target.bin}" />
+		<sign-jars configuration-dir="../rsuite-oxygen-author-component-build-configuration" dir="${target.home}" include-pattern="*.jar"/>
+	</target>
+
+	<target name="define-classpath">
+		<path id="classpath.base">
+			<fileset dir="${target.home}">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+	</target>
+</project>

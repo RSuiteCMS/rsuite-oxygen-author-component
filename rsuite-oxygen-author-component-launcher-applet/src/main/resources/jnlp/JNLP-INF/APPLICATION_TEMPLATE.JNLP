@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="*">
+    
+    <information>
+        <title>RSuite oXygen XML Author Application Launcher</title>
+        <vendor>RSI Content Solutions</vendor>
+        <homepage href="http://www.rsicms.com"/>
+    </information>
+    <security>
+        <all-permissions/>  
+    </security>
+    <resources>
+        <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>
+        <jar href="rsuite/rest/v2/static/rsuite-oxygen-applet-integration/launcher/lib/rsuite-oxygen-launcher-applet.jar?@VERSION@"
+            main="true"/>
+        <jar href="rsuite/rest/v2/static/rsuite-oxygen-applet-integration/launcher/lib/rsuite-oxygen-launcher-base.jar?@VERSION@"/>
+        
+        <property name="jnlp.versionEnabled" value="true"/>
+        <property name="jnlp.packEnabled" value="true"/>
+    </resources>
+    
+    <applet-desc name="Author Component Launcher Applet"
+        main-class="com.rsicms.rsuite.editors.oxygen.launcher.OxygenApplicationLauncherApplet"
+        width="300"
+        height="300">
+        <param name="parameterLists" value="*"/>
+    </applet-desc>
+    
+    <update check="always"/>
+</jnlp>

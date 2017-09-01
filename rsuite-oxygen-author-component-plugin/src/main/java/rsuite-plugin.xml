@@ -1,0 +1,145 @@
+<rsuite-plugin id="rsuite-oxygen-applet-integration" version="^version^ svnRev ^svnRev^ at ^timestamp^">
+	<lifecycleListener type="com.rsicms.rsuite.editors.oxygen.integration.lifecycle.OxygenInegrationPluginLifecycleListener" />
+	<extensionProvider id="rsuite.WebService">
+		<!-- for the static root starting at "/oxygen", serve the files in /WebContent
+			of the plugin -->
+		<staticWebService root="/rsuite-oxygen-applet-integration"
+		                  path="/WebContent" />
+
+
+		<remoteApiDefinition description="Creates an html page with embedded oxygen applet"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.OxygenAppletContainerWebService"
+		                     id="rsuite.oxygen.applet" />
+
+		<remoteApiDefinition description="Run oxygen component"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.MoInfoWebService"
+		                     id="rsuite.oxygen.mo.info" />
+
+		<remoteApiDefinition description="Resolve schema webservice"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.SchemaResolverWebService"
+		                     id="rsuite.oxygen.schema.resolver" />
+
+		<remoteApiDefinition id="rsuite.oxygen.tree.control"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.lookup.TreeControlWebService" />
+
+		<remoteApiDefinition id="rsuite.oxygen.bookmarks.lookup"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.bookmarks.BookmarksLookupWebService" />
+
+		<remoteApiDefinition id="rsuite.oxygen.bookmarks.manager"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.bookmarks.BookmarksManagerWebService" />
+
+
+		<remoteApiDefinition id="rsuite.oxygen.image.preview"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.GetImageWebService" />
+
+		<remoteApiDefinition id="rsuite.oxygen.license"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.LicenseWebService" />
+
+		<remoteApiDefinition id="rsuite.oxygen.configuration"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.ConfigurationWebService" />
+
+		<remoteApiDefinition id="rsuite.oxygen.alias.resolver"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.AliasWebService" />
+
+		<remoteApiDefinition description="Download schema webservice"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.SchemaDownloaderWebService"
+		                     id="rsuite.oxygen.schema.downloader" />
+
+		<remoteApiDefinition description="Search XML Types"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.search.SearchTypesWebService"
+		                     id="rsuite.oxygen.search.types" />
+
+		<remoteApiDefinition description="Search XML"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.search.SearchXmlWebService"
+		                     id="rsuite.oxygen.search.searchXML" />
+		                     
+		<remoteApiDefinition description="Search by RSuite Id"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.search.SearchRSuiteIdWebService"
+		                     id="rsuite.oxygen.search.rsuiteId" />		                     
+
+		<remoteApiDefinition description="Open document parameters"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.OpenDocumentParametersWebService"
+		                     id="rsuite.oxygen.open.document.parameters" />		                     
+
+		<remoteApiDefinition description="Open document parameters"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.OxygenJarInfoWebService"
+		                     id="rsuite.oxygen.application.jar.info" />		                     
+
+		<remoteApiDefinition description="Checks RSuite session"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.session.RSuiteSessionCheckWebService"
+		                     id="rsuite.oxygen.check.session" />		                     
+
+		<remoteApiDefinition description="Launch Applet Jnlp"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.jnlp.OxygenAppletJnlpWebService"
+		                     id="rsuite.oxygen.launch.applet.jnlp" />
+		                     
+		<remoteApiDefinition description="Launcher application Jnlp"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.jnlp.OxygenLauncherApplicationJnlpWebService"
+		                     id="rsuite.oxygen.launcher.application.jnlp" />
+		                     
+		<remoteApiDefinition description="Provides launch configuration information"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.configuration.OxygenLaunchConfigurationWebService"
+		                     id="rsuite.launch.configuration" />		                     
+
+		<remoteApiDefinition description="Provides launcher jar file"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.jar.OxygenLauncherJarWebService"
+		                     id="rsuite.oxygen.launch.launcher.jar.generator" />
+
+		<remoteApiDefinition description="Provides base launch oxygen paramaters "
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.launch.parameters.OxygenLaunchParamatersWebService"
+		                     id="rsuite.oxygen.launch.base.parameters" />		                     
+
+		<remoteApiDefinition description="Save document in RSuite"
+		                     handler="com.rsicms.rsuite.editors.oxygen.integration.webservice.save.SaveWebService"
+		                     id="rsuite.oxygen.save.document" />
+
+
+	</extensionProvider>
+	<extensionProvider id="rsuite.UI">
+		<scriptInclude src="/rsuite-oxygen-applet-integration/action/oxygen-launch.js"/>
+		<scriptInclude src="/rsuite-oxygen-applet-integration/launcher/oxygen-launcher.js"/>
+	</extensionProvider>
+	
+	  <extensionProvider id="rsuite.ContextMenu">
+	    <contextMenuRuleSet name="edition.editoxygen">
+			<menuItemList>
+				<menuItem>
+					<type>action</type>
+					<actionName>rsuite:oxygen:launch:action</actionName>
+					<label>Edit with oXygen NEW</label>
+				</menuItem>
+			</menuItemList>
+			<ruleList>
+				<rule>include nodeType mo</rule>
+			</ruleList>
+		</contextMenuRuleSet>
+		
+		<contextMenuRuleSet name="edition.editoxygen.jnlp.app">
+			<menuItemList>
+				<menuItem>
+					<type>action</type>
+					<actionName>rsuite:invokeWebservice</actionName>
+					<label>Get Oxygen launcher Jnlp</label>
+					<property name="remoteApiName" value="rsuite.oxygen.launcher.application.jnlp" />
+					<property name="useTransport" value="iframe" />					 					
+				</menuItem>
+			</menuItemList>
+			<ruleList>				
+			</ruleList>
+		</contextMenuRuleSet>
+		
+		<contextMenuRuleSet name="edition.editoxygen.jar.app">
+			<menuItemList>
+				<menuItem>
+					<type>action</type>
+					<actionName>rsuite:invokeWebservice</actionName>
+					<label>Get Oxygen launcher jar</label>
+					<property name="remoteApiName" value="rsuite.oxygen.launch.launcher.jar.generator" />
+					<property name="useTransport" value="iframe" />					 					
+				</menuItem>
+			</menuItemList>
+			<ruleList>				
+			</ruleList>
+		</contextMenuRuleSet>
+	</extensionProvider>
+</rsuite-plugin>
