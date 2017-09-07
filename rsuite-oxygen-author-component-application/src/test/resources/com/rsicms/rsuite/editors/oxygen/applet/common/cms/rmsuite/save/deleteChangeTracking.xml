@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<regulation xmlns:r="http://www.rsuitecms.com/rsuite/ns/metadata"
+    xmlns:ditaarch="http://dita.oasis-open.org/architecture/2005/"
+    class="- topic/topic chapter/chapter regulation/regulation " ditaarch:DITAArchVersion="1.2"
+    domains="(topic hi-d)       (topic indexing-d)      (topic d4p_formatting-d)      (topic d4p_ruby-d)      a(props d4p_renditionTarget)      (topic d4p_classification-d)      (topic d4p_math-d)      (topic d4p_simplebib-d)      (topic d4p_variables-d)      (topic d4p_verse-d)      (topic xml-d)      a(base rsuiteIdAtt)     "
+    id="wiring-regulation-chapter-11" r:rsuiteId="2336">
+    <title class="- topic/title ">Chapter <regnum
+            class="+ topic/data  d4p_enumBase-d/d4pEnumeratorBase     regnum-d/regnum "
+            name="regnum">11</regnum> Scope</title>
+    <?oxy_delete author="lukasz" timestamp="20150907T133358+0200" content="&lt;regulation class=&quot;- topic/topic chapter/chapter regulation/regulation &quot; ditaarch:DITAArchVersion=&quot;1.2&quot; domains=&quot;(topic hi-d)       (topic indexing-d)      (topic d4p_formatting-d)      (topic d4p_ruby-d)      a(props d4p_renditionTarget)      (topic d4p_classification-d)      (topic d4p_math-d)      (topic d4p_simplebib-d)      (topic d4p_variables-d)      (topic d4p_verse-d)      (topic xml-d)      a(base rsuiteIdAtt)     &quot; id=&quot;r110.1&quot; r:rsuiteId=&quot;2338&quot;&gt;&lt;title class=&quot;- topic/title &quot;&gt;&lt;regnum class=&quot;+ topic/data  d4p_enumBase-d/d4pEnumeratorBase     regnum-d/regnum &quot; name=&quot;regnum&quot;&gt;110.1&lt;/regnum&gt; General&lt;/title&gt;&lt;body class=&quot;- topic/body &quot;&gt;&lt;p class=&quot;- topic/p &quot; r:rsuiteId=&quot;2339&quot;&gt;&quot;Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&quot;&lt;/p&gt;&lt;/body&gt;&lt;/regulation&gt;"?>
+</regulation>

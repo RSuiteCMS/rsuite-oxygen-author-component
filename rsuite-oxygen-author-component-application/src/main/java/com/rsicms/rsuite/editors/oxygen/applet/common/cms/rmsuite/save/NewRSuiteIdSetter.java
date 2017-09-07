@@ -1,6 +1,7 @@
 package com.rsicms.rsuite.editors.oxygen.applet.common.cms.rmsuite.save;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class NewRSuiteIdSetter {
 	private IOxygenDocument documentComponent;
 
 	private Logger logger = Logger.getLogger(getClass());
-	
+
 	public NewRSuiteIdSetter(ICmsActions cmsAction,
 			IOxygenDocument documentComponent) {
 		this.cmsAction = cmsAction;
@@ -40,9 +41,8 @@ public class NewRSuiteIdSetter {
 
 			AuthorDocumentController documentController = documentComponent
 					.getOxygenDocumentController();
-			Map<String, String> newRSuiteIDsMap = RSuiteIdToXpathMapper
-					.getRSuiteIDsMapFromDocument(IOUtils.toInputStream(
-							document, "utf-8"));
+			Map<String, String> newRSuiteIDsMap = getRSuiteIDsMapFromDocument(IOUtils
+					.toInputStream(document, "utf-8"));
 
 			Set<String> newRSuiteIDs = newRSuiteIDsMap.keySet();
 			newRSuiteIDs.removeAll(existingRSuiteIDs);
@@ -63,5 +63,16 @@ public class NewRSuiteIdSetter {
 				| OxygenIntegrationException e) {
 			OxygenUtils.handleException(logger, e);
 		}
+	}
+
+	private Map<String, String> getRSuiteIDsMapFromDocument(
+			InputStream inputStream) throws OxygenIntegrationException {
+		RSuiteIdToXpathMapper rsuiteIdMapper = new RSuiteIdToXpathMapper();
+
+		RSuiteDocumentParser documentParser = new RSuiteDocumentParser(
+				rsuiteIdMapper);
+		documentParser.parseRSuiteDocument(inputStream);
+
+		return rsuiteIdMapper.getRsuiteIDsToXpathMap();
 	}
 }

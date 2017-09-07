@@ -1,10 +1,12 @@
 package com.rsicms.rsuite.editors.oxygen.applet.common.cms.rmsuite.save;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
+import com.rsicms.rsuite.editors.oxygen.applet.common.OxygenIntegrationException;
 import com.rsicms.rsuite.editors.oxygen.applet.common.api.ICmsActions;
 import com.rsicms.rsuite.editors.oxygen.applet.common.api.ICommand;
 import com.rsicms.rsuite.editors.oxygen.applet.components.IOxygenDocument;
@@ -32,15 +34,27 @@ public class RSuiteSaveCommand implements ICommand {
 
 		String document = documentComponent.getSerializedDocument();
 
-		existingRSuiteIDs = RSuiteIdToXpathMapper
-				.getRSuiteIDsMapFromDocument(IOUtils.toInputStream(document,
-						"utf-8"));
+		document = parseDocumentBeforeSave(document); 
 
 		byte[] bytes = document.getBytes("utf-8");
 		progressListener.setSize(bytes.length);
 
 		cmsAction.saveDocument(documentComponent.getDocumentUri(),
 				progressListener, bytes);
+	}
+
+	private String parseDocumentBeforeSave(String document)
+			throws OxygenIntegrationException, IOException {
+		ChangeTrackingUpdater changeTrackingUpdater = new ChangeTrackingUpdater();
+		RSuiteIdToXpathMapper rsuiteIdMapper = new RSuiteIdToXpathMapper();
+		
+		RSuiteDocumentParser documentParser = new RSuiteDocumentParser(rsuiteIdMapper, changeTrackingUpdater);
+		documentParser.parseRSuiteDocument(IOUtils.toInputStream(document,
+				"utf-8"));
+		
+		existingRSuiteIDs = rsuiteIdMapper.getRsuiteIDsToXpathMap();
+		document = changeTrackingUpdater.getUpdatedDocument();
+		return document;
 	}
 
 	@Override
