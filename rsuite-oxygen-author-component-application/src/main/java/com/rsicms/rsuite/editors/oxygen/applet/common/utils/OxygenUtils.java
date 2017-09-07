@@ -64,29 +64,24 @@ public class OxygenUtils {
 		}
 	}
 
-	public static Icon getIcon(String imgageName) {
+	public static Icon getIcon(String img) {
 		ImageIcon icon = null;
-		try {
-			InputStream is = getImageStream(imgageName);
-			icon = new ImageIcon(IOUtils.toByteArray(is));
-		} catch (Exception ex) {
-			OxygenUtils.handleException(logger, ex);
-		}
-		
-		return icon;
-	}
 
-	public static InputStream getImageStream(String imgageName) throws IOException {
-			String imagePath = "images/" + imgageName;
+		String imagePath = "images/" + img;
+		try {
 			InputStream is = OxygenUtils.class.getClassLoader()
 					.getResourceAsStream(imagePath);
 			if (is == null) {
 				throw new IOException("Unable to find image: " + imagePath);
 			}
 
-			return is;			
+			icon = new ImageIcon(IOUtils.toByteArray(is));
 
-		
+		} catch (Exception ex) {
+			OxygenUtils.handleException(logger, ex);
+		}
+
+		return icon;
 	}
 
 	/**

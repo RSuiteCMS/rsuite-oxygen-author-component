@@ -108,12 +108,16 @@ public class OxygenMainComponentDefaultToolbar implements
 	
 		actionsToolbar.addSeparator();
 
+		// Cut/Copy/Paste
+
 		addOxygenActionToToolbar(authorCommonActions, "Edit/Edit_Cut");
 		addOxygenActionToToolbar(authorCommonActions, "Edit/Edit_Copy");
 		addOxygenActionToToolbar(authorCommonActions, "Edit/Edit_Paste");
 	
+
 		actionsToolbar.addSeparator();
 
+		// Undo/Redo
 		
 		addOxygenActionToToolbar(authorCommonActions, "Edit/Edit_Undo");
 		addOxygenActionToToolbar(authorCommonActions, "Edit/Edit_Redo");
@@ -133,15 +137,15 @@ public class OxygenMainComponentDefaultToolbar implements
 		for (Component component :  reviewToolbar.getComponents()){
 			if (! (component instanceof JToolBar.Separator)){
 				actionsToolbar.add(component);
-			}			
+			}
+			
 		}	
+			
 		
 		//CSS alternatives toolbar.
 			JToolBar cssAlternatives = authorPage.createCSSAlternativesToolbar();
 			actionsToolbar.add(cssAlternatives);
 		}
-		
-		
 		
 	}
 

@@ -3,7 +3,7 @@ package com.rsicms.rsuite.editors.oxygen.applet.parameters;
 public enum OxygenAppletStartupParmatersNames {
 
 	USER_NAME("userName"), PROJECT_NAME("projectName"), CUSTOMIZATION_CLASS ("customizationClass", false), BASE_URI("baseUri"),
-	SESSION_KEY("sessionKey"), MO_ID_TO_OPEN("moIdToOpen", false);
+	SESSION_KEY("sessionKey");
 	
 	private String name;
 	

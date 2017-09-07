@@ -5,16 +5,18 @@ import static com.rsicms.rsuite.editors.oxygen.applet.standalone.OxygenStandalon
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.rsicms.rsuite.editors.oxygen.applet.common.OxygenIntegrationException;
@@ -37,34 +39,28 @@ public class OxygenStandaloneRunner {
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			SwingUtilities.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						createAndShowApplication(args);
-					} catch (OxygenIntegrationException e) {
-						logger.error(e, e);
-					}
-				}
-			});
-			
+			createAndShowApplication(args);
 		} catch (Exception e) {
 			logger.error(e, e);
 		}
 
 	}
 
+	private static JLabel createInitializeLabel() {
+		JLabel label = new JLabel("Initializing Oxygen Application...");
+		label.setName("initialize");
+		return label;
+	}
+
 	public static JFrame createAndShowApplication(final String[] args)
 			throws OxygenIntegrationException {
 
-		final OxygenAppletStartupParmaters startupParameters = getStartUpParameters(args);
-		configureLog(startupParameters);
-		
 		final OxygenStandaloneFrame frame = new OxygenStandaloneFrame();
-		frame.setSize(650, 250);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);		
+
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setSize(dim.width, dim.height);
+
+		frame.setVisible(true);
 
 		final JPanel progressPanel = createLoadingScreen();
 		frame.add(progressPanel, BorderLayout.NORTH);
@@ -72,9 +68,8 @@ public class OxygenStandaloneRunner {
 		Thread thread = new Thread() {
 			public void run() {
 				try {
-					createAndShowOxygenComponent(frame, startupParameters, progressPanel);					
-					Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-					frame.setSize(dim.width, dim.height);
+					createAndShowOxygenComponent(frame, args);
+					frame.remove(progressPanel);
 					SwingUtilities.updateComponentTreeUI(frame);
 				} catch (Exception e) {
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,10 +89,22 @@ public class OxygenStandaloneRunner {
 	}
 
 	private static JFrame createAndShowOxygenComponent(
-			OxygenStandaloneFrame frame, OxygenAppletStartupParmaters startupParameters, JPanel progressPanel)
+			OxygenStandaloneFrame frame, String[] args)
 			throws OxygenIntegrationException {
 
+		Map<String, String> startupArguments = null;
+		OxygenAppletStartupParmaters startupParameters = null;
 		OxygenOpenDocumentParmaters documentParameters = new OxygenOpenDocumentParmaters();
+
+		if (args.length == 1) {
+			startupArguments = parseStartupArgument(args[0]);
+			startupParameters = parseStartupParameters(startupArguments);
+		} else {
+			startupParameters = parseStartupParameters(args);
+		}
+
+		configureLog(startupParameters);
+
 		final OxygenMainComponent component = OxygenMainComponent
 				.initializeComponent(startupParameters, documentParameters,
 						false);
@@ -113,35 +120,28 @@ public class OxygenStandaloneRunner {
 				openDocumentManager);
 		socketServer.start();
 
-		String moId = startupParameters.getParameterValue(OxygenAppletStartupParmatersNames.MO_ID_TO_OPEN);
-		if (StringUtils.isNotEmpty(moId)) {
+		if (startupArguments != null
+				&& startupArguments.get("moIdToOpen") != null) {
+			String moId = startupArguments.get("moIdToOpen");
 			openDocumentManager.openDocumentInANewTab(moId);
 
 		}
 
 		frame.add(component);
 
-		frame.remove(progressPanel);
 		return component.getParentFrame();
 
 	}
 
-	private static OxygenAppletStartupParmaters getStartUpParameters(
-			String[] args) throws OxygenIntegrationException {
-		OxygenAppletStartupParmaters startupParameters = null;
-		
+	private static JPanel createLoadingScreen() {
 
-		if (args.length == 1) {
-			Map<String, String> startupArguments = parseStartupArgument(args[0]);
-			startupParameters = parseStartupParameters(startupArguments);			
-		} else {
-			startupParameters = parseStartupParameters(args);
-		}
-		return startupParameters;
-	}
+		final JPanel progressPanel = new JPanel(new GridLayout(2, 1));
+		progressPanel.add(createInitializeLabel());
+		JProgressBar progressBar = new JProgressBar();
+		progressBar.setIndeterminate(true);
+		progressPanel.add(progressBar);
 
-	private static JPanel createLoadingScreen() throws OxygenIntegrationException {
-		return new OxygenLoadingPanel();
+		return progressPanel;
 	}
 
 	private static void configureLog(
