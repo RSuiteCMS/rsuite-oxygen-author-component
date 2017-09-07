@@ -1,4 +1,4 @@
-<rsuite-plugin id="rsuite-oxygen-applet-integration" version="^version^ svnRev ^svnRev^ at ^timestamp^">
+<rsuite-plugin id="rsuite-oxygen-applet-integration" version="^version^ at ^timestamp^">
 	<lifecycleListener type="com.rsicms.rsuite.editors.oxygen.integration.lifecycle.OxygenInegrationPluginLifecycleListener" />
 	<extensionProvider id="rsuite.WebService">
 		<!-- for the static root starting at "/oxygen", serve the files in /WebContent
@@ -114,7 +114,7 @@
 			</ruleList>
 		</contextMenuRuleSet>
 		
-		<contextMenuRuleSet name="edition.editoxygen.jnlp.app">
+		<!--  contextMenuRuleSet name="edition.editoxygen.jnlp.app">
 			<menuItemList>
 				<menuItem>
 					<type>action</type>
@@ -140,6 +140,6 @@
 			</menuItemList>
 			<ruleList>				
 			</ruleList>
-		</contextMenuRuleSet>
+		</contextMenuRuleSet -->
 	</extensionProvider>
 </rsuite-plugin>

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><error timezoneOffset="0" type="com.reallysi.rsuite.api.AuthenticationException"><message>[type=com.reallysi.rsuite.api.AuthenticationException][ExceptionId=6e970344]: [type=com.reallysi.rsuite.api.AuthenticationException][ExceptionId=6e970344][ERRORCODE=1002]: Unknown user ID/password combination.</message></error>

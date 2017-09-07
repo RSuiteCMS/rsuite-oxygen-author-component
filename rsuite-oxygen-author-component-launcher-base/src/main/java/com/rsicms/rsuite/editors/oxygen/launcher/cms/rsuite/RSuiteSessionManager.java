@@ -61,6 +61,13 @@ public class RSuiteSessionManager implements CmsSessionManager {
 		HttpResponse response = httpConnector.sendGetRequest(checkSessionUri);
 
 		if (response.getCode() >= 200 && response.getCode() < 300) {
+			
+			String responseText = response.getResponseText();
+			
+			if (responseText.contains("ERROR_LOGIN_FAILURE")){
+				return false;
+			}
+			
 			sessionKey = response.getResponseText();
 			persistLocalSession(sessionKey);
 			return true;
@@ -85,13 +92,12 @@ public class RSuiteSessionManager implements CmsSessionManager {
 			String sessionKey = RSuiteHttpResponseParser
 					.parseResponseSaveResponse(response.getResponseText(),
 							"key");
+
 			this.sessionKey = sessionKey;
 
 			persistLocalSession(sessionKey);
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
 
 			if (e.getMessage() != null
 					&& e.getMessage().contains(

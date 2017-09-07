@@ -1,6 +1,5 @@
 package com.rsicms.rsuite.editors.oxygen.applet.common.cms.rmsuite.save;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,57 +7,29 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import com.rsicms.rsuite.editors.oxygen.applet.common.OxygenIntegrationException;
+public class RSuiteIdToXpathMapper implements RSuiteDocumentParserHandler {
 
-public class RSuiteIdToXpathMapper {
+	private Map<String, String> rsuiteIDsToXpathMap = new HashMap<>();
 
-	private static XMLInputFactory xmlInputFactory = XMLInputFactory
-			.newInstance();
+	private AtomicInteger elementLevel = new AtomicInteger(0);
+	private List<AtomicInteger> xpathLevelList = new ArrayList<>();
 
-	public static Map<String, String> getRSuiteIDsMapFromDocument(
-			InputStream documentInputStream) throws OxygenIntegrationException {
+	@Override
+	public void handleXmlElement(XMLEvent xmlEvent) throws XMLStreamException {
 
-		try (InputStream document = documentInputStream) {
-			return parseDocument(document);
-		} catch (XMLStreamException | IOException e) {
-			throw new OxygenIntegrationException(e);
-		}
+		handleStartElement(xmlEvent);
+
+		handleCloseElement(xmlEvent);
 
 	}
 
-	private static Map<String, String> parseDocument(InputStream document)
-			throws XMLStreamException, IOException {
+	private void handleStartElement(XMLEvent xmlEvent) {
 
-		AtomicInteger elementLevel = new AtomicInteger(0);
-		List<AtomicInteger> xpathLevelList = new ArrayList<>();
-		Map<String, String> rsuiteIDsToXpathMap = new HashMap<>();
-
-		XMLEventReader xmlEventReader = xmlInputFactory
-				.createXMLEventReader(document);
-
-		while (xmlEventReader.hasNext()) {
-			XMLEvent xmlEvent = xmlEventReader.nextEvent();
-
-			handleStartElement(xmlEvent, rsuiteIDsToXpathMap, xpathLevelList,
-					elementLevel);
-
-			handleCloseElement(xmlEvent, xpathLevelList, elementLevel);
-
-		}
-
-		return rsuiteIDsToXpathMap;
-	}
-
-	private static void handleStartElement(XMLEvent xmlEvent,
-			Map<String, String> rsuiteIDsToXpathMap,
-			List<AtomicInteger> xpathLevelList, AtomicInteger elementLevel) {
 		if (xmlEvent.isStartElement()) {
 
 			elementLevel.incrementAndGet();
@@ -95,8 +66,7 @@ public class RSuiteIdToXpathMapper {
 		elementPostionAtSpecificLevel.incrementAndGet();
 	}
 
-	private static void handleCloseElement(XMLEvent xmlEvent,
-			List<AtomicInteger> xpathLevelList, AtomicInteger elementLevel) {
+	private void handleCloseElement(XMLEvent xmlEvent) {
 		if (xmlEvent.isEndElement()) {
 			if (elementLevel.get() < xpathLevelList.size()) {
 				for (int i = elementLevel.get(); i < xpathLevelList.size(); i++) {
@@ -111,7 +81,7 @@ public class RSuiteIdToXpathMapper {
 	private static String createXpath(List<AtomicInteger> xpathLevelList) {
 		StringBuilder xpath = new StringBuilder();
 		for (AtomicInteger position : xpathLevelList) {
-			if (position.get() == 0){
+			if (position.get() == 0) {
 				break;
 			}
 			xpath.append("/*[").append(position).append("]");
@@ -120,4 +90,9 @@ public class RSuiteIdToXpathMapper {
 		return xpath.toString();
 
 	}
+
+	public Map<String, String> getRsuiteIDsToXpathMap() {
+		return rsuiteIDsToXpathMap;
+	}
+
 }

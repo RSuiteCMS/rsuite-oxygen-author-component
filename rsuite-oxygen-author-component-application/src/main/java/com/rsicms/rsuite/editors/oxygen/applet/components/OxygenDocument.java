@@ -137,7 +137,7 @@ public class OxygenDocument implements IOxygenDocument {
 			this.mainComponent = mainComponent;
 			configure(editorComponentProvider);
 
-			
+			documentViews = new OxygenDocumentViews(mainComponent, this);
 
 			documentId = documentUri;
 
@@ -183,8 +183,6 @@ public class OxygenDocument implements IOxygenDocument {
 					documentCustomization, documentURI);
 
 			setDocumentContent(toLoad.toString(), documentContent);
-			
-			documentViews = new OxygenDocumentViews(mainComponent, this);
 
 			OxygenConfiguration oxygenConfiguration = mainComponent
 					.getOxygenConfiguration();
@@ -310,9 +308,7 @@ public class OxygenDocument implements IOxygenDocument {
 					 * @see ro.sync.ecss.extensions.api.component.listeners.AuthorComponentListener#documentTypeChanged()
 					 */
 					public void documentTypeChanged() {
-						if (documentViews != null){
-							documentViews.reconfigureActionsToolbar();
-						}
+						documentViews.reconfigureActionsToolbar();
 					}
 
 					/**
@@ -321,9 +317,7 @@ public class OxygenDocument implements IOxygenDocument {
 					 * @see ro.sync.ecss.extensions.api.component.listeners.AuthorComponentListener#loadedDocumentChanged()
 					 */
 					public void loadedDocumentChanged() {
-						if (documentViews != null){
-							documentViews.reconfigureActionsToolbar();	
-						}
+						documentViews.reconfigureActionsToolbar();
 					}
 				});
 

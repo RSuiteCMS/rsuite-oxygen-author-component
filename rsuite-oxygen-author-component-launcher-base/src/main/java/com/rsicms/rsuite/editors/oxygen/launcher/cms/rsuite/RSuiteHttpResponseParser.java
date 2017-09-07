@@ -52,6 +52,10 @@ public class RSuiteHttpResponseParser {
 					if (rootElement == null) {
 						rootElement = currentElement;
 					}
+										
+					if ("faultType".equalsIgnoreCase(currentElement)){
+							isError = true;
+					}
 				}
 
 				if (event.isCharacters()

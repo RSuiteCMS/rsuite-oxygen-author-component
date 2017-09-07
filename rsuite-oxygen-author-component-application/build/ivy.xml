@@ -19,7 +19,7 @@
 
 		<!-- BASE OXYGEN PACKAGE -->
 		<dependency org="oxygen" name="oxygen-author-component"
-			rev="17.0.3" conf="oxygen-base-package->default">
+			rev="16.1.2" conf="oxygen-base-package->default">
 			<artifact name="oxygen-author-component" type="zip" />
 		</dependency>
 		<!-- BASE OXYGEN PACKAGE -->
